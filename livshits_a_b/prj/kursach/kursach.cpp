@@ -139,58 +139,6 @@ int hamming_dist(ull img_hash_1, ull img_hash_2) {
     return count_bits(res);
 }
 
-//vector<Mat>& generator(const vector<Mat>& etalon_data, int num_per_image) {
-//    //random generator for chosing operation
-//    //for dataset preparation
-//    random_device rd;
-//    mt19937 gen(rd());
-//    uniform_int_distribution<> dis(1, 3);
-//    int operation = 0;
-//
-//    int et_num = etalon_data.size();
-//
-//    for (int item = 0; item < et_num; ++item) {
-//        for (int attempt = 0; attempt < num_per_image; ++attempt) {
-//            //1 - rotated image
-//            //2 - scaled image
-//            //3 - rotated & scaled image
-//            operation = dis(gen);
-//            if (operation == 1) {
-//                continue;
-//            }
-//            if (operation == 2) {
-//                continue;
-//            }
-//            if (operation == 3) {
-//                continue;
-//            }
-//        }
-//    }
-//}
-
-//vector<pair<int, int>> vert_obj;
-//vector<pair<int, int>> vert_wide;
-//int count_pts = 0;
-//Mat im;
-//
-//void mouse_callback(int  event, int  x, int  y, int  flag, void* param) {
-//    static int curx, cury;
-//    if (event == EVENT_LBUTTONDOWN) {
-//        ++count_pts;
-//        if (count_pts <= 4) {
-//            vert_obj.push_back({ x, y });
-//            if (count_pts == 4) {
-//            }
-//        }
-//        else {
-//            vert_wide.push_back({ x, y });
-//        }
-//        cout << "(" << x << ", " << y << ")" << endl;
-//        imshow("example", pic);
-//        
-//    }
-//}
-
 int main() {
     //file with paths of Etalon dataset
     freopen("markdown.txt", "r", stdin);
@@ -227,61 +175,30 @@ int main() {
     res_vert[3] = Point2f(200, 200);
 
     vector<Mat> unpersp_img(num_img);
+    vector<ull> percept_hashes(num_img);
     for (int img = 0; img < num_img; ++img) {
         unpersp_img[img] = make_unperspective(images[img], vertices[img], res_vert, 0.5);
         imshow("Unperspective image", unpersp_img[img]);
+        percept_hashes[img] = dhash(unpersp_img[img]);
         waitKey(0);
     }
 
+    for (int img1 = 0; img1 < num_img; ++img1) {
+        for (int img2 = 1; img2 < num_img; ++img2) {
+            if (img1 == img2) {
+                continue;
+            }
+            int hamm_dist = hamming_dist(percept_hashes[img1], percept_hashes[img2]);
+            if (hamm_dist == 0) {
+                cout << "Background near images " << img1 << "and " << img2 << "is equal!" << endl;
+                continue;
+            }
+            if (hamm_dist <= 10) {
+                cout << "Background near images " << img1 << "and " << img2 << "is similar" << endl;
+                continue;
+            }
+        }
+    }
 
-    ////number of images in Etalon dataset
-    //int et_num;
-    //cin >> et_num;
-
-    //vector<Mat> etalon_data;
-
-    //string path;
-    //for (int item = 0; item < et_num; ++item) {
-    //    cin >> path;
-    //    etalon_data.push_back(imread(path));
-    //}
-
-    ////generating dataset
-    //vector<Mat> data;
-    ////for (int item = 0; item < et_num; ++item) {
-    ////    //original image
-    ////    data.push_back(etalon_data[item]);
-
-
-    ////    //visualizing image
-
-    ////    //rotated image
-
-
-    ////    //scaled image
-
-    ////    cout << 5 << endl;
-    ////    //rotated and scale image
-
-
-    ////}
-
-    //cout << etalon_data[0].rows << " " << etalon_data[0].cols << endl;
-    //int rows = etalon_data[0].rows,
-    //    cols = etalon_data[0].cols;
-
-    ////Mat output = Mat(rows, cols, CV_8UC3);
-    ////etalon_data[0].copyTo(output(Rect(0, 0, cols, rows)));
-    ////imshow("Etalon dataset image", output);
-    //imshow("", etalon_data[0]);
-
-    //waitKey(0);
     return 0;
 }
-
-//int res = 0;
-//while (img_hash_1 != 0) {
-//    res += ~((img_hash_1 & 1ULL) ^ (img_hash_2 & 1ULL));
-//    img_hash_1 >>= 1;
-//    img_hash_2 >>= 1;
-//}
